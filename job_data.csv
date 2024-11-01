@@ -1,0 +1,26 @@
+company_name,job_title,posting_duration,skills
+"{""Moody's Corporation""}",{'Data Specialist'},{'few days ago'},{'data analysis|sql proficiency|trend interpretation|entity resolution|attention to detail|information technology|database|technical skills|python|machine learning'}
+{'Analytics Vidhya'},{'Data Miner'},{'few days ago'},{'advanced analytics|sas|data mining|tableau|predictive modeling|software packages|logistic regression|business applications'}
+{'Analytics Vidhya'},{'Data Scientist'},{'few days ago'},{'hive|algorithms|data mining|sql|pig|java|mongodb|hbase|python|machine learning|nosql|cassandra'}
+{'Analytics Vidhya'},{'Data Scientist'},{'few days ago'},{'algorithms|sql|java|hadoop|big data|python|sas|natural language processing|machine learning'}
+{'bprise pvt ltd'},{'Data Science'},{'few days ago'},{'hive|algorithms|authoring|data mining|sql|pig|d3.js|security|java|big data|mongodb|hbase|python|machine learning|nosql|cassandra'}
+{'DXC Technologies'},{'Data Architect'},{'few days ago'},{'data modeling|data governance|cloud architecture|data integration|communication skills|information technology|pmp|big data|global delivery|database|crm|mobile|microsoft azure|problem solving|leadership skills'}
+{'Analytics Vidhya'},{'Data Scientist'},{'few days ago'},{'ds|big data|python|oracle|mining|dsp|bi|storage|sql|database|hadoop|crm|mobile|machine learning'}
+{'Analytics Vidhya'},{'Data Scientist'},{'few days ago'},{'hive|sql|hadoop|big data|python|sas|natural language processing|machine learning|ruby|nosql|mapreduce'}
+{'Analytics Vidhya'},{'Data Scientist'},{'few days ago'},{'hive|algorithms|linux|data structures|hadoop|big data|cloud computing|mongodb|cli|python|rdbms|natural language processing|kernel|machine learning|nosql'}
+{'Analytics Vidhya'},{'Data Scientist'},{'few days ago'},{'algorithms|data mining|artificial intelligence|sql|python|mobile|problem solving|machine learning'}
+{'DXC Technologies'},{'Data Scientist'},{'few days ago'},{'machine learning|data analysis|python programming|statistical techniques|sql development|algorithms|salesforce|natural language processing|servicenow|opencv'}
+{'tcg digital solutions pvt ltd'},{'Data Engineer'},{'few days ago'},{'hive|algorithms|pig|database|java|data structures|mysql|hadoop|python|nosql|cassandra|hdfs|unix'}
+{'Analytics Vidhya'},{'Data Scientist'},{'few days ago'},{'algorithms|python|natural language processing|lucene|machine learning|elastic search|java|apache|hadoop|big data'}
+{'Analytics Vidhya'},{'Data Analytics'},{'few days ago'},{'hive|python|sas|machine learning|pig|mapreduce|splunk|hadoop|big data'}
+{'PNR Software Solutions Private Limited'},{'Data Scientist'},{'few days ago'},{'hive|algorithms|data mining|bi|sql|pig|d3.js|mongodb|hbase|oracle|sas|machine learning|nosql|cassandra'}
+{'Analytics Vidhya'},{'Data Scientist'},{'few days ago'},{'algorithms|python|natural language processing|data mining|information retrieval|lucene|machine learning|sql|artificial neural networks'}
+{'Analytics Vidhya'},{'Data Scientist'},{'few days ago'},{'hive|algorithms|python|scala|datamining|machine learning|hadoop|big data|hbase'}
+{'accolite digital'},{'Data Engineer'},{'few days ago'},{'data engineering|hadoop framework|spark programming|containerization techniques|devops practices|orchestration|information technology|pig|java|python|hive|conference|scala|docker|rest|machine learning|infrastructure|hdfs|splunk'}
+{'IBM India Pvt Ltd'},{'Data Scientist'},{'few days ago'},{'machine learning expertise|deep learning proficiency|natural language processing|data pipeline architecture|full stack development|algorithms|c|css|docker|security|java|git|devops|linux|html|mongodb|rest|python|javascript|spring boot|django|project delivery|couchdb'}
+{'ispatial techno solutions pvt ltd.'},{'Data Scientist'},{'few days ago'},{'algorithms|c|scala|data mining|sql|java|mysql|hadoop|middleware|python|oracle|mq|nosql'}
+{'LAKSH HUMAN RESOURCE'},{'Data Scientist'},{'few days ago'},{'hive|algorithms|sql|database|java|linux|api|hadoop|big data|mongodb|python|sas|microsoft azure|technology|nosql|environment|cassandra|forms'}
+{'accenture'},{'Data Engineer'},{'a month ago'},{'oracle pl  /  sql|etl processes|data quality|data pipelines|data modeling|data engineer|data warehousing|plsql|database|infrastructure|data integration'}
+{'BUSISOL SOURCING INDIA PVT. LTD'},{'Data analyst'},{'few days ago'},{'reports|charts|data mining|formulas|reporting services|relational database|sql server'}
+{'highrise solutions llp'},{'Data Engineer'},{'few days ago'},{'python|spark programming|aws glue|data analysis|hadoop ecosystem|cmp|bi|boomi|symfony|sql|security|iam|ssrs|software engineer|mysql|php'}
+{'accenture'},{'Data Engineer'},{'a month ago'},{'data warehouse management|etl processes implementation|data quality assurance|sql proficiency|data pipeline development|data engineer|data warehousing|data modeling|infrastructure|data integration|informatica'}
