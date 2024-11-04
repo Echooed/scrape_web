@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Search Results</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <h1>Job Search Results</h1>
+    </div>
+
+    <div class="container mt-5">
+        {% for job in jobs %}
+            <div class="job-card">
+                <h2 class="job-title">{{ job.job_title }}</h2>
+                <h3 class="company-name">{{ job.company_name }}</h3>
+                <p class="skills">Skills: {{ job.skills }}</p>
+                <p class="more-details"><a href="{{ job.more_details }}">More Details</a></p>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
