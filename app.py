@@ -1,12 +1,11 @@
 from urllib.parse import quote
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 from bs4 import BeautifulSoup
 import requests
 import re
-import pandas as pd
-import time
 
 app = Flask(__name__)
+
 # Job scraping function
 def scrape_jobs(job_keyword):
     url = 'https://www.timesjobs.com/candidate/job-search.html?searchType=Home_Search&from=submit&asKey=OFF&txtKeywords=&cboPresFuncArea=&cboWorkExp1=0&clusterName=CLUSTER_EXP'
@@ -35,7 +34,7 @@ def scrape_jobs(job_keyword):
                 'job_title': job_title,
                 'posting_date': posting_date,
                 'skills': skills_list,
-                'more_details': quote(job_box['more_details'])  # Encode the URLs
+                'more_details': quote(more_details)  # Corrected this line
             })
     return job_data
 
@@ -48,11 +47,9 @@ def search():
     job_keyword = request.form.get('job_keyword')
     
     # Call your scraping function here
-    job_data = find_jobs(job_keyword)
+    job_data = scrape_jobs(job_keyword)  # Updated this line
 
     return render_template('results.html', jobs=job_data)
 
-# Your existing scraping function, updated to accept a keyword
-def find_jobs(keyword):
-    # ... existing scraping logic
-    return job_data
+if __name__ == '__main__':
+    app.run(debug=True)
