@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TimesJobs Search</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
         .job-card:hover {
             transform: translateY(-2px);
@@ -18,7 +17,7 @@
         <!-- Header -->
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-800 mb-2">TimesJobs Search</h1>
-            <p class="text-gray-600">Search and track jobs in real-time</p>
+            <p class="text-gray-600">Search for jobs in real-time</p>
         </div>
 
         <!-- Search Form -->
@@ -38,34 +37,6 @@
             </div>
         </div>
 
-        <!-- Statistics Section -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4">Search Statistics</h2>
-                <canvas id="keywordChart"></canvas>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4">Top Companies</h2>
-                <canvas id="companyChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="mb-8">
-            <div class="border-b border-gray-200">
-                <nav class="flex -mb-px">
-                    <button onclick="showTab('live')" 
-                            class="tab-button active mr-8 py-4 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none">
-                        Live Results
-                    </button>
-                    <button onclick="showTab('history')"
-                            class="tab-button mr-8 py-4 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none">
-                        Job History
-                    </button>
-                </nav>
-            </div>
-        </div>
-
         <!-- Loading Indicator -->
         <div id="loadingIndicator" class="text-center mb-8 hidden">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
@@ -73,222 +44,86 @@
         </div>
 
         <!-- Results Container -->
-        <div id="liveResults" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <!-- Live job cards will be inserted here -->
-        </div>
-
-        <!-- History Container -->
-        <div id="historyResults" class="hidden">
-            <div class="mb-4">
-                <select id="historyFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Keywords</option>
-                </select>
-            </div>
-            <div id="historyContainer" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <!-- History job cards will be inserted here -->
-            </div>
-            <div class="mt-8 flex justify-center" id="pagination">
-                <!-- Pagination will be inserted here -->
-            </div>
+        <div id="resultsContainer" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Job cards will be inserted here -->
         </div>
     </div>
 
-    <!-- Add the JavaScript code here -->
     <script>
-        // Event Source for live updates
-        let eventSource;
+        let eventSource = null;
 
-        // Initialize charts
-        let keywordChart;
-        let companyChart;
-
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize buttons
-            const searchButton = document.getElementById('searchButton');
-            const stopButton = document.getElementById('stopButton');
-            const searchInput = document.getElementById('searchInput');
-            
-            // Add event listeners
-            searchButton.addEventListener('click', startSearch);
-            stopButton.addEventListener('click', stopSearch);
-            
-            // Load initial statistics
-            loadStats();
-            
-            // Load job history
-            loadJobHistory();
-        });
-
-        // Start search function
-        async function startSearch() {
-            const keyword = document.getElementById('searchInput').value.trim();
-            if (!keyword) return;
-
-            try {
-                // Show loading state
-                document.getElementById('loadingIndicator').classList.remove('hidden');
-                document.getElementById('searchButton').classList.add('hidden');
-                document.getElementById('stopButton').classList.remove('hidden');
-
-                // Start search request
-                const response = await fetch('/start_search', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ keyword }),
-                });
-
-                if (!response.ok) throw new Error('Search failed to start');
-
-                // Start event stream
-                if (eventSource) eventSource.close();
-                eventSource = new EventSource('/stream');
-                eventSource.onmessage = handleJobUpdate;
-                
-            } catch (error) {
-                console.error('Search error:', error);
-                alert('Failed to start search. Please try again.');
-            }
-        }
-
-        // Stop search function
-        async function stopSearch() {
-            try {
-                await fetch('/stop_search', { method: 'POST' });
-                if (eventSource) {
-                    eventSource.close();
-                    eventSource = null;
-                }
-                
-                // Reset UI
-                document.getElementById('loadingIndicator').classList.add('hidden');
-                document.getElementById('searchButton').classList.remove('hidden');
-                document.getElementById('stopButton').classList.add('hidden');
-                
-            } catch (error) {
-                console.error('Stop search error:', error);
-            }
-        }
-
-        // Handle job updates
-        function handleJobUpdate(event) {
-            const data = JSON.parse(event.data);
-            if (!data || Object.keys(data).length === 0) return;
-            
-            // Create job card
-            const jobCard = createJobCard(data);
-            document.getElementById('liveResults').insertAdjacentHTML('afterbegin', jobCard);
-        }
-
-        // Create job card HTML
         function createJobCard(job) {
             return `
-                <div class="bg-white rounded-lg shadow-md p-6 job-card">
-                    <h3 class="text-xl font-semibold mb-2">${job.job_title}</h3>
-                    <p class="text-gray-600 mb-4">${job.company_name}</p>
-                    <p class="text-sm text-gray-500 mb-2">${job.posting_duration}</p>
-                    <p class="text-sm text-gray-700 mb-4">Skills: ${job.skills}</p>
-                    <a href="${job.more_details}" target="_blank" 
-                       class="text-blue-500 hover:text-blue-600">More Details</a>
+                <div class="job-card bg-white rounded-lg shadow-md p-6 hover:shadow-lg">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">${job.job_title}</h2>
+                    <h3 class="text-lg text-gray-700 mb-2">${job.company_name}</h3>
+                    <p class="text-sm text-gray-500 mb-4">${job.posting_duration}</p>
+                    <div class="mb-4">
+                        <h4 class="font-medium text-gray-700 mb-2">Required Skills:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${job.skills.split('|').map(skill => 
+                                `<span class="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded">${skill}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <a href="${job.more_details}" target="_blank" 
+                           class="text-blue-500 hover:text-blue-600">View Details</a>
+                        <span class="text-xs text-gray-500">${job.scraped_at}</span>
+                    </div>
                 </div>
             `;
         }
 
-        // Load statistics
-        async function loadStats() {
-            try {
-                const response = await fetch('/jobs/stats');
-                const data = await response.json();
-                updateCharts(data);
-            } catch (error) {
-                console.error('Failed to load stats:', error);
-            }
-        }
+        function startSearch() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) return;
 
-        // Update charts
-        function updateCharts(data) {
-            // Update keyword chart
-            const keywordCtx = document.getElementById('keywordChart').getContext('2d');
-            keywordChart = new Chart(keywordCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(data.keywords),
-                    datasets: [{
-                        label: 'Jobs per Keyword',
-                        data: Object.values(data.keywords),
-                        backgroundColor: 'rgba(59, 130, 246, 0.5)'
-                    }]
-                }
+            // Show/hide buttons and loading indicator
+            document.getElementById('searchButton').classList.add('hidden');
+            document.getElementById('stopButton').classList.remove('hidden');
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            document.getElementById('resultsContainer').innerHTML = '';
+
+            // Start server-side search
+            fetch('/start_search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({keyword})
             });
 
-            // Update company chart
-            const companyCtx = document.getElementById('companyChart').getContext('2d');
-            companyChart = new Chart(companyCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(data.top_companies),
-                    datasets: [{
-                        label: 'Jobs per Company',
-                        data: Object.values(data.top_companies),
-                        backgroundColor: 'rgba(16, 185, 129, 0.5)'
-                    }]
+            // Start listening for results
+            if (eventSource) eventSource.close();
+            eventSource = new EventSource('/stream');
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.job_title) {
+                    const jobCard = createJobCard(data);
+                    document.getElementById('resultsContainer').insertAdjacentHTML('afterbegin', jobCard);
                 }
-            });
+            };
         }
 
-        // Tab switching
-        function showTab(tabName) {
-            const tabs = document.querySelectorAll('.tab-button');
-            tabs.forEach(tab => tab.classList.remove('border-blue-500', 'text-blue-600'));
-            
-            const activeTab = document.querySelector(`[onclick="showTab('${tabName}')"]`);
-            activeTab.classList.add('border-blue-500', 'text-blue-600');
-            
-            if (tabName === 'live') {
-                document.getElementById('liveResults').classList.remove('hidden');
-                document.getElementById('historyResults').classList.add('hidden');
-            } else {
-                document.getElementById('liveResults').classList.add('hidden');
-                document.getElementById('historyResults').classList.remove('hidden');
-                loadJobHistory();
+        function stopSearch() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
             }
+
+            fetch('/stop_search', {method: 'POST'});
+            
+            // Update UI
+            document.getElementById('searchButton').classList.remove('hidden');
+            document.getElementById('stopButton').classList.add('hidden');
+            document.getElementById('loadingIndicator').classList.add('hidden');
         }
 
-        // Load job history
-        async function loadJobHistory(page = 1) {
-            const keyword = document.getElementById('historyFilter').value;
-            try {
-                const response = await fetch(`/jobs?page=${page}&keyword=${keyword}`);
-                const data = await response.json();
-                
-                const container = document.getElementById('historyContainer');
-                container.innerHTML = data.jobs.map(job => createJobCard(job)).join('');
-                
-                // Update pagination
-                updatePagination(data.current_page, data.pages);
-            } catch (error) {
-                console.error('Failed to load job history:', error);
-            }
-        }
-
-        // Update pagination
-        function updatePagination(currentPage, totalPages) {
-            const pagination = document.getElementById('pagination');
-            let html = '';
-            
-            for (let i = 1; i <= totalPages; i++) {
-                html += `
-                    <button onclick="loadJobHistory(${i})" 
-                            class="mx-1 px-3 py-1 rounded ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-gray-200'}">
-                        ${i}
-                    </button>
-                `;
-            }
-            
-            pagination.innerHTML = html;
-        }
+        // Event Listeners
+        document.getElementById('searchButton').addEventListener('click', startSearch);
+        document.getElementById('stopButton').addEventListener('click', stopSearch);
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') startSearch();
+        });
     </script>
 </body>
 </html>
