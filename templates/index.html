@@ -3,76 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Search Results</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>TimesJobs Search</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f4f7f6;
-        }
-        .header {
-            background-color: #007bff;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .job-card {
-            border: 1px solid #ddd;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            background-color: white;
-        }
-        .job-title {
-            font-size: 1.5rem;
-            color: #007bff;
-        }
-        .company-name {
-            font-size: 1.2rem;
-            color: #333;
-        }
-        .skills {
-            font-size: 1rem;
-            color: #6c757d;
-        }
-        .more-details {
-            color: #007bff;
+        .job-card:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease-in-out;
         }
     </style>
 </head>
-<body>
-
-    <div class="header">
-        <h1>Job Search Results</h1>
-        <p>Find your dream job easily!</p>
-    </div>
-
-    <div class="container mt-5">
-        <!-- Job Card Template -->
-        {% for job in jobs %}
-        <div class="job-card">
-            <h2 class="job-title">{{ job.job_title }}</h2>
-            <p class="company-name">{{ job.company_name }}</p>
-            <p class="posting-date">Posted: {{ job.posting_duration }}</p>
-            <p class="skills"><strong>Skills:</strong> {{ job.skills }}</p>
-            <a href="{{ job.more_details }}" class="more-details" target="_blank">More Details</a>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">TimesJobs Search</h1>
+            <p class="text-gray-600">Search for jobs in real-time</p>
         </div>
-        {% endfor %}
+
+        <!-- Search Form -->
+        <div class="max-w-xl mx-auto mb-8">
+            <div class="flex gap-4">
+                <input type="text" id="searchInput" 
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Enter job keyword...">
+                <button id="searchButton" 
+                        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Search
+                </button>
+                <button id="stopButton" 
+                        class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 hidden">
+                    Stop
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="text-center mb-8 hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            <p class="text-gray-600 mt-2">Searching for jobs...</p>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Job cards will be inserted here -->
+        </div>
     </div>
 
-    <div class="container mt-5">
-        <form action="/search" method="POST">
-            <div class="form-group">
-                <label for="job_keyword">Enter Job Keyword:</label>
-                <input type="text" class="form-control" id="job_keyword" name="job_keyword" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Search</button>
-        </form>
-    </div>
-    
-    <!-- Bootstrap JS, jQuery, and Popper.js -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        let eventSource = null;
+
+        function createJobCard(job) {
+            return `
+                <div class="job-card bg-white rounded-lg shadow-md p-6 hover:shadow-lg">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">${job.job_title}</h2>
+                    <h3 class="text-lg text-gray-700 mb-2">${job.company_name}</h3>
+                    <p class="text-sm text-gray-500 mb-4">${job.posting_duration}</p>
+                    <div class="mb-4">
+                        <h4 class="font-medium text-gray-700 mb-2">Required Skills:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${job.skills.split('|').map(skill => 
+                                `<span class="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded">${skill}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <a href="${job.more_details}" target="_blank" 
+                           class="text-blue-500 hover:text-blue-600">View Details</a>
+                        <span class="text-xs text-gray-500">${job.scraped_at}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function startSearch() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) return;
+
+            // Show/hide buttons and loading indicator
+            document.getElementById('searchButton').classList.add('hidden');
+            document.getElementById('stopButton').classList.remove('hidden');
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            document.getElementById('resultsContainer').innerHTML = '';
+
+            // Start server-side search
+            fetch('/start_search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({keyword})
+            });
+
+            // Start listening for results
+            if (eventSource) eventSource.close();
+            eventSource = new EventSource('/stream');
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.job_title) {
+                    const jobCard = createJobCard(data);
+                    document.getElementById('resultsContainer').insertAdjacentHTML('afterbegin', jobCard);
+                }
+            };
+        }
+
+        function stopSearch() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+
+            fetch('/stop_search', {method: 'POST'});
+            
+            // Update UI
+            document.getElementById('searchButton').classList.remove('hidden');
+            document.getElementById('stopButton').classList.add('hidden');
+            document.getElementById('loadingIndicator').classList.add('hidden');
+        }
+
+        // Event Listeners
+        document.getElementById('searchButton').addEventListener('click', startSearch);
+        document.getElementById('stopButton').addEventListener('click', stopSearch);
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') startSearch();
+        });
+    </script>
 </body>
 </html>
