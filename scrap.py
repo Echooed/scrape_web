@@ -60,11 +60,11 @@ def find_jobs():
                     })
             
             # Check for existing CSV file
-            file_exists = os.path.isfile('job_.listings.csv')
+            file_exists = os.path.isfile('job_listings.csv')
             
             # Load existing data if CSV exists
             if file_exists:
-                previous_data = pd.read_csv('job_listing.csv')
+                previous_data = pd.read_csv('job_listings.csv')
                 current_data_df = pd.DataFrame(current_job_data)
                 
                 # Check if dataframes are identical
@@ -73,7 +73,7 @@ def find_jobs():
                     return  
             
             # Write new data to CSV if different
-            pd.DataFrame(current_job_data).to_csv('job_listings', index=False)
+            pd.DataFrame(current_job_data).to_csv('job_listings.csv', index=False)
             print("Data updated in CSV file.")
 
     except requests.exceptions.ConnectionError:
